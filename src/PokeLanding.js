@@ -1,54 +1,48 @@
-import { AppBar, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Grid, Toolbar, Typography } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
-import React, { useState } from 'react'
-import mockData from './mockData'
-
-const useStyles = makeStyles({
-    header: {
-        backgroundColor: '#e63946'
-    },
-    mainContainer: {
-        alignContent: 'center',
-        marginTop: 64,
-        padding: 21,
-    },
-    card: {
-        width: 307,
-        backgroundColor: 'white',
-        '@media (max-width: 1024px)': {
-            width: '100%'
-        }
-    },
-    cardImage: {
-        margin: 'auto',
-        height: '192px',
-        width: '192px',
-    },
-    NombreTypo: {
-        color: '#1d3557',
-        fontFamily: 'Roboto',
-        fontSize: '16px',
-        fontWeight: 500,
-        textAlign: 'center',
-    }
-})
+import { AppBar, Card, CardActionArea, CardContent, Box, CardMedia, CircularProgress, Grid, Toolbar, Typography } from '@material-ui/core'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import InputBase from '@material-ui/core/InputBase';
+import SearchIcon from '@material-ui/icons/Search';
+import useStyles from './styleLanding';
 
 
-export default function PokeLanding() {
+export default function PokeLanding(props) {
+    const { history } = props;
     const classes = useStyles();
-    const [pokemonData, setPokemonData] = useState(mockData)
+    const [pokemonData, setPokemonData] = useState();
+    const [filter, setFilter] = useState('');
+
+    const handleSearch = (e) => {
+        setFilter(e.target.value)
+    }
+
+    useEffect(() => {
+        axios.get('https://pokeapi.co/api/v2/pokemon?limit=151')
+            .then(function (response) {
+                const { data } = response;
+                const { results } = data;
+                const ApiPokemonData = {};
+                results.forEach((pokemon, index) => {
+                    ApiPokemonData[index + 1] = {
+                        id: index + 1,
+                        name: pokemon.name,
+                        sprite: (`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`)
+                    }
+                });
+                setPokemonData(ApiPokemonData);
+            })
+    }, [])
 
     const pokemonCard = (pokemonId) => {
-        const { id, name, sprites } = mockData[pokemonId];
-        const { front_default } = sprites
-        console.log(sprites);
+        const { id, name, sprite } = pokemonData[pokemonId];
+
         return (
-            <Grid item xs={12} sm={6} md={4} key={pokemonId}>
-                <Card className={classes.card}>
+            <Grid item xs={12} sm={6} md={4} key={id}>
+                <Box className={classes.card} onClick={() => history.push(`/${id}`)}>
                     <CardActionArea>
                         <CardMedia
                             className={classes.cardImage}
-                            image={front_default}
+                            image={sprite}
                             title={'...'}
                         />
                         <CardContent>
@@ -57,7 +51,7 @@ export default function PokeLanding() {
                             </Typography>
                         </CardContent>
                     </CardActionArea>
-                </Card>
+                </Box>
             </Grid>
         )
     }
@@ -65,14 +59,37 @@ export default function PokeLanding() {
 
     return (
         <>
-            <AppBar position='fixed' className={classes.header}>
-                <Toolbar>
-                </Toolbar>
-            </AppBar>
-            <Grid container fullwidth>
-                <Grid container spacing={2} className={classes.mainContainer}>
+            {/* Header Busqueda */}
+            <div className={classes.grow}>
+                <AppBar position="static" className={classes.backgroundBar}>
+                    <Toolbar className={classes.separar}>
+                        <Typography className={classes.title} variant="h6" noWrap>
+                            React Pokedex
+                    </Typography>
+                        <div className={classes.search}>
+                            <div className={classes.searchIcon}>
+                                <SearchIcon />
+                            </div>
+                            <InputBase onChange={handleSearch}
+                                placeholder="Pokemon..."
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
+                        </div>
+
+                    </Toolbar>
+                </AppBar>
+            </div>
+
+            {/* Grilla Pokedex */}
+            <Grid container fullwidth className={classes.mainContainer}>
+                <Grid container spacing={2} className={classes.cardsWrapper}>
                     {pokemonData ?
                         (Object.keys(pokemonData).map(pokemonId =>
+                            pokemonData[pokemonId].name.includes(filter) &&
                             pokemonCard(pokemonId)))
                         :
                         (<CircularProgress />)}
