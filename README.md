@@ -1,5 +1,6 @@
-# Demo Live
+# Demo Live - Search in lowercase!
 https://pabloriusblanco.github.io/Pokedex-React-SPA/
+
 
 # Getting Started with Create React App
 
