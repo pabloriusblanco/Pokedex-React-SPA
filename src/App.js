@@ -1,25 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+import PokeEntry from './PokeEntry';
+import PokeLanding from './PokeLanding';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+
+const App = () => (
+  <Switch>
+    <Route exact path="/" render={(props) => <PokeLanding {...props} />} />
+    <Route
+      exact
+      path="/:pokemonId"
+      render={(props) => <PokeEntry {...props} />}
+    />
+  </Switch>
+);
 
 export default App;
